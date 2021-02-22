@@ -1,0 +1,24 @@
+{
+    "order": [
+        "year",
+        "month",
+        "day",
+        "hour",
+        "minute",
+        "second",
+        "service",
+        "message",
+        "level"
+    ],
+    "fields": {
+        "year": "int",
+        "month": "int",
+        "day": "int",
+        "hour": "int",
+        "minute": "int",
+        "second": "int",
+        "service": "str",
+        "message": "str",
+        "level": "str"
+    }
+}
