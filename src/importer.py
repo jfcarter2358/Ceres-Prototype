@@ -27,7 +27,7 @@ def get_writable(data, free_data, meta):
 def _do_write(data, group, block, offset, length):
     _check_dirs(group, block)
     with open('{}/{}/{}'.format(common.CERES_HOME + "/data", group, block), "r+b") as f:
-        f.seek(common.BLOCK_SIZE * block + offset)
+        f.seek(int(common.BLOCK_SIZE) * int(block) + int(offset))
         f.write(data)
 
     pad_len = len(str(common.BLOCK_SIZE))

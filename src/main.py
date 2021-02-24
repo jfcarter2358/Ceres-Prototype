@@ -1,10 +1,11 @@
 import common
 import exporter
 import importer
+import manager
+import antler
 import os
 import sys
 import time
-import antler
 from flask_api import FlaskAPI
 from flask import request
 from flask_api import status
@@ -13,12 +14,16 @@ from datetime import datetime
 
 free_data = {}
 app = FlaskAPI(__name__)
-common.init_schema()
 
 def _init_free():
-    global free
-    for i in range(0, common.MAX_GROUPS):
-        free_data[i] = {j:[{"start": 0, "end": 65536}] for j in range(0, common.MAX_BLOCKS)}
+    global free_data
+
+    if os.path.exists('{}/data/free_data.json'.format(common.CERES_HOME)):
+        with open('{}/data/free_data.json'.format(common.CERES_HOME)) as f:
+            free_data = json.load(f)
+    else:
+        for i in range(0, common.MAX_GROUPS):
+            free_data[i] = {j:[{"start": 0, "end": 65536}] for j in range(0, common.MAX_BLOCKS)}
 
 @app.route('/insert', methods=['POST'])
 def post_message():
@@ -38,6 +43,8 @@ def post_message():
         
         insert_string = insert_string[:-1]
         free_data, ident = importer.get_writable(insert_string, free_data, meta)
+        with open('{}/data/free_data.json'.format(common.CERES_HOME), 'w') as f:
+            json.dump(free_data, f)
         idents.append(ident)
 
     end = time.time()
@@ -47,14 +54,23 @@ def post_message():
 
 @app.route('/query', methods=['POST'])
 def get_results():
+    global free_data
+
     data = request.get_json()
     out = []
     query = data['query']
     start = time.time()
-    idents = antler.parse(query)
-    for i in idents:
-        data = exporter.get_data(i)
-        out.append(data)
+    idents, mode = antler.parse(query)
+    if mode == 'select':
+        for i in idents:
+            data = exporter.get_data(i)
+            out.append(data)
+    elif mode == 'delete':
+        for i in idents:
+            free_data = manager.delete_data(i, free_data)
+        free_data = manager.merge_free(free_data)
+        with open('{}/data/free_data.json'.format(common.CERES_HOME), 'w') as f:
+            json.dump(free_data, f)
     end = time.time()
     print('{}'.format(end - start))
     print(len(out))
@@ -85,6 +101,11 @@ def _do_test():
     _do_run()
         
 if __name__ == '__main__':
+    config_path = os.getenv('CERES_CONFIG_PATH')
+    if not config_path:
+        config_path = 'ceres_home/config/config.ini'
+    common.read_config(config_path)
+    common.init_schema()
     _init_free()
     if sys.argv[1] == 'test':
         _do_test()

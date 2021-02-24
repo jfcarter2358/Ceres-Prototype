@@ -11,6 +11,13 @@ AST = namedtuple('AST', 'operation left right')
 NON_LOGIC_OPERATIONS = ['LIMIT', 'ORDERBY', 'ORDERDESC']
 
 def parse(query):
+    query = query.strip()
+    if query.startswith('SELECTBY'):
+        mode = 'select'
+        query = query.replace('SELECTBY', '').strip()
+    if query.startswith('DELETEBY'):
+        mode = 'delete'
+        query = query.replace('DELETEBY', '').strip()
     # perform cleanup on parens
     # replace all 'open paren -> text' with 'open paren -> space -> text'
     query = re.sub(r'\((\S)', r'( \g<1>', query)
@@ -54,10 +61,10 @@ def parse(query):
 
     if not did_match:
         out = parse_query(query[2:len(query) - 2])
-        return out
+        return out, mode
     # out = None
     out = operate(top_ast, asts)
-    return out
+    return out, mode
 
 def parse_query(query):
     RE_PATTERN = r'(\S*)\s+(=|>|>=|<=|<|!=|IN)\s+(\S*)'

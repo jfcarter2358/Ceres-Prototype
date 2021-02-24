@@ -9,3 +9,4 @@ run:
 clean:
 	rm -rf ceres_home/data/*
 	rm -rf ceres_home/indices/*
+	rm src/*.pyc

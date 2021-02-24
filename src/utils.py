@@ -13,3 +13,7 @@ def merge_lists(A, B):
         out.append(A[i])
     out += B
     return out
+
+def extract_from_id(id):
+    parts = id.split(':')
+    return int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3])
