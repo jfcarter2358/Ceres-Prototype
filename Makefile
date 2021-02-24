@@ -1,12 +1,23 @@
 .PHONY: test clean run
 
+VERSION := dev
+
+build-docker:
+	docker build -t johncarterodg/ceres-prototype:$(VERSION) .
+
+push-docker:
+	docker push johncarterodg/ceres-prototype:$(VERSION)
+
+docker: build-docker push-docker
+
 test: clean
-	python src/main.py test
+	python src/ceres.py test
 
 run:
-	python src/main.py run
+	python src/ceres.py run
 
 clean:
-	rm -rf ceres_home/data/*
-	rm -rf ceres_home/indices/*
-	rm src/*.pyc
+	rm -rf ceres_home/data/* || true
+	rm -rf ceres_home/indices/* || true
+	rm src/*.pyc || true
+	rm -rf src/__pycache__ || true

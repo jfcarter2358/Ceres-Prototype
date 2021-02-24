@@ -108,6 +108,8 @@ if __name__ == '__main__':
     common.init_schema()
     _init_free()
     if sys.argv[1] == 'test':
+        print('testing')
         _do_test()
     elif sys.argv[1] == 'run':
+        print('running')
         _do_run()
