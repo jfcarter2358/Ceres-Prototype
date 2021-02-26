@@ -8,7 +8,7 @@ build-docker:
 push-docker:
 	docker push johncarterodg/ceres-prototype:$(VERSION)
 
-docker: build-docker push-docker
+docker: clean build-docker push-docker
 
 test: clean
 	python src/ceres.py test

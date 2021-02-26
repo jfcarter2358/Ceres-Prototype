@@ -11,6 +11,7 @@ from flask import request
 from flask_api import status
 import json
 from datetime import datetime
+import utils
 
 free_data = {}
 app = FlaskAPI(__name__)
@@ -37,18 +38,20 @@ def post_message():
         insert_string = ''
         meta = []
         for k in common.SCHEMA['order']:
-            insert_string += '{},'.format(message[k])
+            if common.SCHEMA['fields'][k] == 'str':
+                insert_string += '{},'.format(message[k].replace(',', '<COMMA>'))
+            else:
+                insert_string += '{},'.format(message[k])
             if k != 'message':
                 meta.append('{}/{}'.format(k, message[k]))
         
         insert_string = insert_string[:-1]
         free_data, ident = importer.get_writable(insert_string, free_data, meta)
-        with open('{}/data/free_data.json'.format(common.CERES_HOME), 'w') as f:
-            json.dump(free_data, f)
         idents.append(ident)
+    with open('{}/data/free_data.json'.format(common.CERES_HOME), 'w') as f:
+        json.dump(free_data, f)
 
     end = time.time()
-    # print('{}'.format(end - start))
 
     return {'status': status.HTTP_200_OK, "ids": idents}
 
@@ -64,7 +67,7 @@ def get_results():
     if mode == 'select':
         for i in idents:
             data = exporter.get_data(i)
-            out.append(data)
+            out.append(utils.map_dict(data, i))
     elif mode == 'delete':
         for i in idents:
             free_data = manager.delete_data(i, free_data)
@@ -73,7 +76,6 @@ def get_results():
             json.dump(free_data, f)
     end = time.time()
     print('{}'.format(end - start))
-    print(len(out))
     return {'status': status.HTTP_200_OK, "data": out}
 
 def _do_run():

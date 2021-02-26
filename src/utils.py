@@ -1,3 +1,5 @@
+import common
+
 def merge_lists(A, B):
     out = []
     for i in range(0, len(A)):
@@ -17,3 +19,14 @@ def merge_lists(A, B):
 def extract_from_id(id):
     parts = id.split(':')
     return int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3])
+
+def map_dict(datum, ident):
+    data = datum.split(',')
+    out = {'id': ident}
+    try:
+        for i in range(0, len(common.SCHEMA['order'])):
+            out[common.SCHEMA['order'][i]] = data[i].replace('<COMMA>', ',')
+    except:
+        print('MISSING DATA')
+        print(data)
+    return out

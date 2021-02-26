@@ -12,6 +12,8 @@ RUN apt-get install python3-pip -y
 
 # make directories
 RUN mkdir -p /ceres/ceres_home/config
+RUN mkdir /ceres/ceres_home/data
+RUN mkdir /ceres/ceres_home/indices
 
 # add contents
 ADD src /ceres

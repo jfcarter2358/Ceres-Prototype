@@ -38,7 +38,6 @@ def parse(query):
     did_match = False
 
     while True:
-        print(query)
         m = re.search(RE_PATTERN, query)
 
         # if there are no more matches then we've done the whole query string
@@ -56,8 +55,6 @@ def parse(query):
         asts[ident] = new_ast
         query = query.replace('( {} {} {} )'.format(groups[0], groups[1], groups[2]), ident, 1)
         top_ast = new_ast
-        
-    print(asts)
 
     if not did_match:
         out = parse_query(query[2:len(query) - 2])
@@ -75,52 +72,73 @@ def parse_query(query):
     out = []
     if groups[1] == 'IN':
         for r in groups[2].split(','):
-            with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], r)) as f:
-                idents = f.read().split('\n')
-            out = utils.merge_lists(out, idents)
+            try:
+                with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], r)) as f:
+                    idents = f.read().split('\n')
+                out = utils.merge_lists(out, idents)
+            except:
+                pass
         return out
     elif groups[1] == '=':
-        with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], groups[2])) as f:
-            out = f.read().split('\n')
-            return out
+        try:
+            with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], groups[2])) as f:
+                out = f.read().split('\n')
+                return out
+        except:
+            pass
     elif groups[1] == '>':
         minor_idx = [f for f in os.listdir(common.CERES_HOME + '/indices/{}'.format(groups[0]))]
         for i in minor_idx:
             if _do_comparison(i, groups[2], '>'):
-                with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
-                    idents = f.read().split('\n')
-                out = utils.merge_lists(out, idents)
+                try:
+                    with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
+                        idents = f.read().split('\n')
+                    out = utils.merge_lists(out, idents)
+                except:
+                    pass
         return out
     elif groups[1] == '>=':
         minor_idx = [f for f in os.listdir(common.CERES_HOME + '/indices/{}'.format(groups[0]))]
         for i in minor_idx:
             if _do_comparison(i, groups[2], '>='):
-                with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
-                    idents = f.read().split('\n')
-                out = utils.merge_lists(out, idents)
+                try:
+                    with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
+                        idents = f.read().split('\n')
+                    out = utils.merge_lists(out, idents)
+                except:
+                    pass
         return out
     elif groups[1] == '<=':
         minor_idx = [f for f in os.listdir(common.CERES_HOME + '/indices/{}'.format(groups[0]))]
         for i in minor_idx:
             if _do_comparison(i, groups[2], '<='):
-                with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
-                    idents = f.read().split('\n')
-                out = utils.merge_lists(out, idents)
+                try:
+                    with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
+                        idents = f.read().split('\n')
+                    out = utils.merge_lists(out, idents)
+                except:
+                    pass
         return out
     elif groups[1] == '<':
         minor_idx = [f for f in os.listdir(common.CERES_HOME + '/indices/{}'.format(groups[0]))]
         for i in minor_idx:
             if _do_comparison(i, groups[2], '<'):
-                with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
-                    idents = f.read().split('\n')
-                out = utils.merge_lists(out, idents)
+                try:
+                    with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
+                        idents = f.read().split('\n')
+                    out = utils.merge_lists(out, idents)
+                except:
+                    pass
         return out
     minor_idx = [f for f in os.listdir(common.CERES_HOME + '/indices/{}'.format(groups[0]))]
     for i in minor_idx:
         if i != groups[2]:
-            with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
-                idents = f.read().split('\n')
-            out = utils.merge_lists(out, idents)
+            try:
+                with open(common.CERES_HOME + '/indices/{}/{}'.format(groups[0], i)) as f:
+                    idents = f.read().split('\n')
+                out = utils.merge_lists(out, idents)
+            except:
+                pass
     return out
 
 def operate(ast, asts):
@@ -227,23 +245,22 @@ def _do_xor(A, B):
     return out
 
 def _do_limit(A, n):
-    print('limit')
     return A[:n]
 
 def _do_orderby(A, field):
     data = []
     for ident in A:
-        d = _map_dict(exporter.get_data(ident), ident)
+        d = utils.map_dict(exporter.get_data(ident), ident)
         data.append(d)
     data = sorted(data, key = lambda x: x[field])
-    print(data)
     out = [x['id'] for x in data]
+    sort_values = [x[field] for x in data]
     return out
 
 def _do_desorderby(A, field):
     data = []
     for ident in A:
-        d = _map_dict(exporter.get_data(ident), ident)
+        d = utils.map_dict(exporter.get_data(ident), ident)
         data.append(d)
     data = sorted(data, key = lambda x: x[field], reverse=True)
 
@@ -265,13 +282,3 @@ def _do_comparison(l, r, op):
         return real_l < real_r
     if op == '<=':
         return real_l <= real_r
-        
-def _map_dict(datum, ident):
-    data = datum.split(',')
-    out = {'id': ident}
-    for i in range(0, len(common.SCHEMA['order'])):
-        out[common.SCHEMA['order'][i]] = data[i]
-    return out
-
-if __name__ == '__main__':
-    print(parse(sys.argv[1]))
