@@ -291,7 +291,7 @@ def _do_comparison(l, r, op):
 
 def check_query(query, meta_keys):
     paren_match = r'\([^\(\)]*\)'
-    logic_match = r'(AND|OR|NOT|XOR|LIMIT|ORDERBY|ORDERDESC)'
+    logic_match = r'\s+(AND|OR|NOT|XOR|LIMIT|ORDERBY|ORDERDESC)\s+'
     group_match = r'(%\S+|\S+\s?(?:=|<|>|<=|>=|IN)\s?\S+|(?:[a-zA-Z]|[0-9])+)'
     expre_match = r'(\S*)\s?(=|<|>|<=|>=|IN)\s?(\S*)'
     ident_match = r'%\S+'
