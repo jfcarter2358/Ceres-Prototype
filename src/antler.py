@@ -91,6 +91,7 @@ def parse_query(query):
                 return out
         except:
             pass
+        return out
     elif groups[1] == '>':
         minor_idx = [f for f in os.listdir(common.CERES_HOME + '/indices/{}'.format(groups[0]))]
         for i in minor_idx:
@@ -292,7 +293,8 @@ def check_query(query, meta_keys):
     paren_match = r'\([^\(\)]*\)'
     logic_match = r'(AND|OR|NOT|XOR|LIMIT|ORDERBY|ORDERDESC)'
     group_match = r'(%\S+|\S+\s?(?:=|<|>|<=|>=|IN)\s?\S+|(?:[a-zA-Z]|[0-9])+)'
-    expression_match = r'(\S*)\s?(=|<|>|<=|>=|IN)\s?(\S*)'
+    expre_match = r'(\S*)\s?(=|<|>|<=|>=|IN)\s?(\S*)'
+    ident_match = r'%\S+'
     limit_match = r'LIMIT\s(\S*)'
     order_match = r'(?:ORDERBY|ORDERDESC)\s(\S*)'
     logic = ['AND', 'OR', 'XOR', 'NOT', 'LIMIT', 'ORDERBY', 'ORDERDESC']
@@ -342,7 +344,7 @@ def check_query(query, meta_keys):
         m2_logic.append('')
 
         for match in m2_expressions:
-            m4 = re.search(expression_match, match)
+            m4 = re.search(expre_match, match)
             if m2_logic[0] == 'LIMIT':
                 try:
                     int(m2_expressions[1])
@@ -352,10 +354,12 @@ def check_query(query, meta_keys):
                 if not m2_expressions[1] in meta_keys:
                     return '{} operations requires a valid index for the right hand side, not {}. Valid indices are: {}'.format(m2_logic[0], m2_expressions[1], meta_keys)
             else:
-                if m4 == None:
-                    return 'Expresssion "{}" is not valid'.format(match)
-                if not m4.groups()[0] in meta_keys:
-                    return '"{}" is not a valid index, valid indices are: {}'.format(m4.groups()[0], meta_keys)
+                m5 = re.search(ident_match, match)
+                if m5 == None:
+                    if m4 == None:
+                        return 'Expresssion "{}" is not valid'.format(match)
+                    if not m4.groups()[0] in meta_keys:
+                        return '"{}" is not a valid index, valid indices are: {}'.format(m4.groups()[0], meta_keys)
 
         ident = str(uuid.uuid4())
         query = query.replace(text, '%' + ident)
