@@ -17,10 +17,11 @@ message = {
     'second': now.second,
     'service': 'foobar',
     'message': sys.argv[1],
-    'level': sys.argv[2]
+    'level': sys.argv[2],
+    "timestamp": "20210201T00:00:00"
 }
 data = {
     'messages': [message]
 }
 
-requests.post('http://localhost:9001/insert', json=data, headers=headers)
+requests.post('http://localhost:9090/insert', json=data, headers=headers)

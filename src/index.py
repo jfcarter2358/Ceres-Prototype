@@ -33,6 +33,13 @@ def add_ident(ident, idents):
         return idents[:pivot] + add_ident(ident, idents[pivot:])
     return add_ident(ident, idents[:pivot]) + idents[pivot:]
 
+def remove_ident(ident, index):
+    with open(common.CERES_HOME + '/indices/' + index) as f:
+        ident_list = f.read().split('\n')
+    ident_list = [x for x in ident_list if x != ident]
+    with open(common.CERES_HOME + '/indices/' + index, 'w') as f:
+        f.write('\n'.join(ident_list))
+
 def _check_dirs(indices):
     if not os.path.exists('{}/indices'.format(common.CERES_HOME)):
         os.mkdir('{}/indices'.format(common.CERES_HOME))

@@ -22,5 +22,16 @@
         "message": "str",
         "level": "str",
         "timestamp": "str"
-    }
+    },
+    "meta": [
+        "year",
+        "month",
+        "day",
+        "hour",
+        "minute",
+        "second",
+        "service",
+        "level",
+        "timestamp"
+    ]
 }

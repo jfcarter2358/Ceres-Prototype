@@ -31,6 +31,7 @@ The Ceres prototype is a "first pass" at building the system in a language that 
 - [ ] Be able to access log by ID
 - [x] Recover "free data" object on start from existing data
 - [ ] Schema validation
+- [x] Query validation
 
 ## Contact
 This software is written by John Carter. If you have any qeustions or concers feel free to create an issue on GitHub or send me an email at jfcarter2358(at)gmail.com

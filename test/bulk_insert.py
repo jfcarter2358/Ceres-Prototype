@@ -20,7 +20,7 @@ for i in range(0, len(logs)):
             'messages': messages
         }
 
-        requests.post('http://localhost:9001/insert', json=data, headers=headers)
+        requests.post('http://localhost:9090/insert', json=data, headers=headers)
         messages = []
     now = datetime.now()
     message = {

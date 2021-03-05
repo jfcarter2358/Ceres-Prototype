@@ -42,8 +42,8 @@ def post_message():
                 insert_string += '{},'.format(message[k].replace(',', '<COMMA>'))
             else:
                 insert_string += '{},'.format(message[k])
-            if k != 'message':
-                meta.append('{}/{}'.format(k, message[k]))
+        for k in common.SCHEMA['meta']:
+            meta.append('{}/{}'.format(k, message[k]))
         
         insert_string = insert_string[:-1]
         free_data, ident = importer.get_writable(insert_string, free_data, meta)
@@ -63,19 +63,35 @@ def get_results():
     out = []
     query = data['query']
     start = time.time()
-    idents, mode = antler.parse(query)
-    if mode == 'select':
-        for i in idents:
-            data = exporter.get_data(i)
-            out.append(utils.map_dict(data, i))
-    elif mode == 'delete':
-        for i in idents:
-            free_data = manager.delete_data(i, free_data)
-        free_data = manager.merge_free(free_data)
-        with open('{}/data/free_data.json'.format(common.CERES_HOME), 'w') as f:
-            json.dump(free_data, f)
+    idents, mode, error = antler.parse(query, common.SCHEMA['meta'])
+    if error == '':
+        if mode == 'select':
+            for i in idents:
+                data = exporter.get_data(i)
+                out.append(utils.map_dict(data, i))
+        elif mode == 'delete':
+            num_deleted = len(idents)
+            for i in idents:
+                free_data = manager.delete_data(i, free_data)
+            free_data = manager.merge_free(free_data)
+            with open('{}/data/free_data.json'.format(common.CERES_HOME), 'w') as f:
+                json.dump(free_data, f)
+            out = {
+                'length': num_deleted
+            }
     end = time.time()
     print('{}'.format(end - start))
+    return {'status': status.HTTP_200_OK, "data": out, "error": error}
+
+@app.route('/index', methods=['POST'])
+def get_index_values():
+    print('INDEX')
+    data = request.get_json()
+    out = []
+    key = data['key']
+
+    out = [x for x in os.listdir('{}/indices/{}'.format(common.CERES_HOME, key))]
+
     return {'status': status.HTTP_200_OK, "data": out}
 
 def _do_run():
