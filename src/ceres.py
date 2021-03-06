@@ -24,12 +24,13 @@ def _do_insert():
 
     print('Thread starting')
     while True:
-        if len(insert_queue) > 0:
+        while len(insert_queue) > 0:
             obj = insert_queue.pop(0)
             free_data, ident = importer.get_writable(obj['insert_string'], free_data, obj['meta'])
             with open('{}/data/free_data.json'.format(common.CERES_HOME), 'w') as f:
                 json.dump(free_data, f)
             print('Inserted record with id {}'.format(ident))
+        time.sleep(0.5)
 
 def _init_free():
     global free_data
